@@ -187,7 +187,7 @@ package com.emibap.textureAtlas
 			var realBounds:Rectangle = new Rectangle(0, 0, bounds.width + _margin * 2, bounds.height + _margin * 2);
 			
 			// Checking filters in case we need to expand the outer bounds
-			if (clip.filters.length > 0)
+			if (clip.filters.length > 0 && !bounds.isEmpty())
 			{
 				// filters
 				var j:int = 0;
@@ -231,35 +231,39 @@ package com.emibap.textureAtlas
 		{
 			var realBounds:Rectangle = getRealBounds(clip);
 			
-			_bData = new BitmapData(realBounds.width, realBounds.height, true, 0);
-			_mat = clip.transform.matrix;
-			_mat.translate(-realBounds.x + _margin, -realBounds.y + _margin);
-			
-			_bData.draw(clip, _mat, _preserveColor ? clipColorTransform : null);
-			
-			var label:String = "";
-			if (clip is MovieClip) {
-				if (clip["currentLabel"] != _currentLab && clip["currentLabel"] != null)
-				{
-					_currentLab = clip["currentLabel"];
-					label = _currentLab;
+			if(!bounds.isEmpty())
+			{
+				_bData = new BitmapData(realBounds.width, realBounds.height, true, 0);
+				_mat = clip.transform.matrix;
+				_mat.translate(-realBounds.x + _margin, -realBounds.y + _margin);
+				
+				_bData.draw(clip, _mat, _preserveColor ? clipColorTransform : null);
+				
+				var label:String = "";
+				if (clip is MovieClip) {
+					if (clip["currentLabel"] != _currentLab && clip["currentLabel"] != null)
+					{
+						_currentLab = clip["currentLabel"];
+						label = _currentLab;
+					}
 				}
+				
+				if (frameBounds) {
+					realBounds.x = frameBounds.x - realBounds.x;
+					realBounds.y = frameBounds.y - realBounds.y;
+					realBounds.width = frameBounds.width;
+					realBounds.height = frameBounds.height;
+				}
+				
+				var item:TextureItem = new TextureItem(_bData, name, label, realBounds.x, realBounds.y, realBounds.width, realBounds.height);
+				
+				_items.push(item);
+				_canvas.addChild(item);
+				
+				
+				_bData = null;
 			}
-			
-			if (frameBounds) {
-				realBounds.x = frameBounds.x - realBounds.x;
-				realBounds.y = frameBounds.y - realBounds.y;
-				realBounds.width = frameBounds.width;
-				realBounds.height = frameBounds.height;
-			}
-			
-			var item:TextureItem = new TextureItem(_bData, name, label, realBounds.x, realBounds.y, realBounds.width, realBounds.height);
-			
-			_items.push(item);
-			_canvas.addChild(item);
-			
-			
-			_bData = null;
+
 			
 			return item;
 		}
